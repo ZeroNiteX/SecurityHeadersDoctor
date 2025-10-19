@@ -1,4 +1,6 @@
 using System.Text.Json.Serialization;
+using SecurityHeadersDoctor.Models;
+using SecurityHeadersDoctor.SecurityHeaders;
 
 var builder = WebApplication.CreateSlimBuilder(args);
 
@@ -7,29 +9,83 @@ builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.TypeInfoResolverChain.Insert(0, AppJsonSerializerContext.Default);
 });
 
+builder.Services.AddHttpClient();
+
 var app = builder.Build();
 
-var sampleTodos = new Todo[]
+// Global error handling
+app.Use(async (context, next) =>
 {
-    new(1, "Walk the dog"),
-    new(2, "Do the dishes", DateOnly.FromDateTime(DateTime.Now)),
-    new(3, "Do the laundry", DateOnly.FromDateTime(DateTime.Now.AddDays(1))),
-    new(4, "Clean the bathroom"),
-    new(5, "Clean the car", DateOnly.FromDateTime(DateTime.Now.AddDays(2)))
-};
+    try
+    {
+        await next();
+    }
+    catch (TaskCanceledException)
+    {
+        context.Response.StatusCode = 504;
+        context.Response.ContentType = "application/json";
+        await context.Response.WriteAsync("""{"error": "Request timeout"}""");
+    }
+    catch (Exception ex)
+    {
+        context.Response.StatusCode = 500;
+        context.Response.ContentType = "application/json";
+        await context.Response.WriteAsync($$"""{"error": "Internal server error: {{ex.Message}}"}""");
+    }
+});
 
-var todosApi = app.MapGroup("/todos");
-todosApi.MapGet("/", () => sampleTodos);
-todosApi.MapGet("/{id}", (int id) =>
-    sampleTodos.FirstOrDefault(a => a.Id == id) is { } todo
-        ? Results.Ok(todo)
-        : Results.NotFound());
+// Serve static files
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
+// API endpoints
+app.MapPost("/inspect", async (InspectRequest request, HttpClient httpClient) =>
+{
+    try
+    {
+        var response = await httpClient.GetAsync(request.Url);
+        var headers = new Dictionary<string, string>();
+        
+        foreach (var header in response.Headers)
+        {
+            headers[header.Key] = string.Join(", ", header.Value);
+        }
+        
+        foreach (var header in response.Content.Headers)
+        {
+            headers[header.Key] = string.Join(", ", header.Value);
+        }
+
+        var result = Analyzer.Analyze(headers);
+        return Results.Ok(result);
+    }
+    catch (HttpRequestException ex)
+    {
+        return Results.BadRequest(new { error = $"Failed to fetch URL: {ex.Message}" });
+    }
+    catch (UriFormatException)
+    {
+        return Results.BadRequest(new { error = "Invalid URL format" });
+    }
+    catch (ArgumentException)
+    {
+        return Results.BadRequest(new { error = "Invalid URL format" });
+    }
+});
+
+app.MapGet("/healthz", () => Results.Ok(new { status = "ok", time = DateTime.UtcNow }));
+
+app.MapGet("/version", () => Results.Ok(new { name = "SecurityHeadersDoctor", version = "0.1.0" }));
 
 app.Run();
 
-public record Todo(int Id, string? Title, DateOnly? DueBy = null, bool IsComplete = false);
-
-[JsonSerializable(typeof(Todo[]))]
+[JsonSerializable(typeof(InspectRequest))]
+[JsonSerializable(typeof(SecurityAnalysisResult))]
+[JsonSerializable(typeof(Finding))]
+[JsonSerializable(typeof(FixSnippets))]
 internal partial class AppJsonSerializerContext : JsonSerializerContext
 {
 }
+
+// Make Program class accessible for testing
+public partial class Program { }

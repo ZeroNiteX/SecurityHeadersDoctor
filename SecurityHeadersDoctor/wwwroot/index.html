@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecurityHeaders Doctor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    colors: {
+                        'grade-a': '#10b981',
+                        'grade-b': '#3b82f6',
+                        'grade-c': '#f59e0b',
+                        'grade-d': '#f97316',
+                        'grade-e': '#ef4444',
+                        'grade-f': '#dc2626',
+                        'primary': {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            900: '#1e3a8a'
+                        }
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-in-out',
+                        'slide-up': 'slideUp 0.3s ease-out',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(10px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Print-friendly styles */
+        @media print {
+            body { background: #fff; }
+            .shadow-md, .shadow { box-shadow: none !important; }
+            .container { max-width: 100% !important; padding: 0 16px; }
+            /* Hide interactive controls in print */
+            #analyzeBtn, #urlInput, .copy-btn, #downloadPdfBtn { display: none !important; }
+            /* Expand code blocks for readability */
+            pre { white-space: pre-wrap; word-break: break-word; }
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        
+        /* Gradient backgrounds */
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 min-h-screen font-sans">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="text-center mb-12 animate-fade-in">
+            <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full mb-6 shadow-lg">
+                <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                </svg>
+            </div>
+            <h1 class="text-5xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 bg-clip-text text-transparent mb-4">
+                SecurityHeaders Doctor
+            </h1>
+            <p class="text-xl text-gray-600 font-medium">Professional Security Header Analysis & Recommendations</p>
+            <div class="mt-4 flex justify-center space-x-6 text-sm text-gray-500">
+                <span class="flex items-center">
+                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                    </svg>
+                    Real-time Analysis
+                </span>
+                <span class="flex items-center">
+                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                    </svg>
+                    Fix Snippets
+                </span>
+                <span class="flex items-center">
+                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                    </svg>
+                    PDF Export
+                </span>
+            </div>
+        </div>
+
+        <!-- Input Form -->
+        <div class="max-w-3xl mx-auto mb-12 animate-slide-up">
+            <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-8 card-hover">
+                <div class="text-center mb-6">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-2">Analyze Security Headers</h2>
+                    <p class="text-gray-600">Enter a URL to get comprehensive security header analysis</p>
+                </div>
+                <div class="flex gap-4">
+                    <div class="flex-1 relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+                            </svg>
+                        </div>
+                        <input 
+                            type="url" 
+                            id="urlInput" 
+                            placeholder="https://example.com"
+                            class="w-full pl-10 pr-4 py-4 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-lg"
+                            value="https://httpbin.org/headers"
+                        >
+                    </div>
+                    <button 
+                        id="analyzeBtn" 
+                        class="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-semibold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                    >
+                        <span class="flex items-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                            Analyze
+                        </span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results -->
+        <div id="results" class="hidden max-w-7xl mx-auto space-y-8">
+            <!-- Grade Card -->
+            <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-8 card-hover animate-slide-up">
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h2 class="text-3xl font-bold text-gray-900 mb-2">Security Analysis Report</h2>
+                        <div id="summary" class="text-lg text-gray-600"></div>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <div id="gradeBadge" class="text-4xl font-bold px-6 py-3 rounded-2xl shadow-lg"></div>
+                        <button id="downloadPdfBtn" class="px-6 py-3 bg-gradient-to-r from-gray-700 to-gray-900 text-white rounded-xl hover:from-gray-800 hover:to-black focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                            <span class="flex items-center">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                Download PDF
+                            </span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Findings -->
+            <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-8 card-hover animate-slide-up">
+                <div class="flex items-center mb-6">
+                    <div class="w-10 h-10 bg-gradient-to-br from-orange-400 to-red-500 rounded-lg flex items-center justify-center mr-4">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900">Security Findings</h3>
+                </div>
+                <div id="findings" class="space-y-4"></div>
+            </div>
+
+            <!-- Raw Headers -->
+            <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-8 card-hover animate-slide-up">
+                <div class="flex items-center mb-6">
+                    <div class="w-10 h-10 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-lg flex items-center justify-center mr-4">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900">Raw Headers</h3>
+                </div>
+                <div class="bg-gray-50 rounded-xl p-6 border border-gray-200">
+                    <pre id="rawHeaders" class="text-sm text-gray-700 overflow-x-auto whitespace-pre-wrap"></pre>
+                </div>
+            </div>
+
+            <!-- Fix Snippets -->
+            <div class="grid lg:grid-cols-3 gap-8">
+                <!-- .NET Snippet -->
+                <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-6 card-hover animate-slide-up">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center mr-3">
+                                <span class="text-white font-bold text-sm">.NET</span>
+                            </div>
+                            <h3 class="text-xl font-bold text-gray-900">.NET Core</h3>
+                        </div>
+                        <button class="copy-btn px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5" data-target="dotnet-snippet">
+                            <span class="flex items-center">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                </svg>
+                                Copy
+                            </span>
+                        </button>
+                    </div>
+                    <div class="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                        <pre id="dotnet-snippet" class="text-xs text-gray-700 overflow-x-auto whitespace-pre-wrap"></pre>
+                    </div>
+                </div>
+
+                <!-- NGINX Snippet -->
+                <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-6 card-hover animate-slide-up">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 bg-gradient-to-br from-green-500 to-emerald-500 rounded-lg flex items-center justify-center mr-3">
+                                <span class="text-white font-bold text-sm">NG</span>
+                            </div>
+                            <h3 class="text-xl font-bold text-gray-900">NGINX</h3>
+                        </div>
+                        <button class="copy-btn px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg hover:from-green-600 hover:to-emerald-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5" data-target="nginx-snippet">
+                            <span class="flex items-center">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                </svg>
+                                Copy
+                            </span>
+                        </button>
+                    </div>
+                    <div class="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                        <pre id="nginx-snippet" class="text-xs text-gray-700 overflow-x-auto whitespace-pre-wrap"></pre>
+                    </div>
+                </div>
+
+                <!-- Express Snippet -->
+                <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-6 card-hover animate-slide-up">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-lg flex items-center justify-center mr-3">
+                                <span class="text-white font-bold text-sm">JS</span>
+                            </div>
+                            <h3 class="text-xl font-bold text-gray-900">Express.js</h3>
+                        </div>
+                        <button class="copy-btn px-4 py-2 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-lg hover:from-yellow-600 hover:to-orange-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5" data-target="express-snippet">
+                            <span class="flex items-center">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                </svg>
+                                Copy
+                            </span>
+                        </button>
+                    </div>
+                    <div class="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                        <pre id="express-snippet" class="text-xs text-gray-700 overflow-x-auto whitespace-pre-wrap"></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading -->
+        <div id="loading" class="hidden text-center py-16">
+            <div class="max-w-md mx-auto">
+                <div class="relative">
+                    <div class="w-20 h-20 mx-auto mb-6">
+                        <div class="absolute inset-0 rounded-full border-4 border-blue-200"></div>
+                        <div class="absolute inset-0 rounded-full border-4 border-blue-600 border-t-transparent animate-spin"></div>
+                    </div>
+                    <div class="w-16 h-16 mx-auto mb-4">
+                        <div class="absolute inset-0 rounded-full border-4 border-purple-200"></div>
+                        <div class="absolute inset-0 rounded-full border-4 border-purple-600 border-t-transparent animate-spin" style="animation-direction: reverse; animation-duration: 1.5s;"></div>
+                    </div>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-800 mb-2">Analyzing Security Headers</h3>
+                <p class="text-gray-600">Please wait while we fetch and analyze the security configuration...</p>
+            </div>
+        </div>
+
+        <!-- Error -->
+        <div id="error" class="hidden max-w-2xl mx-auto">
+            <div class="bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 rounded-2xl p-8 shadow-lg">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <div class="w-12 h-12 bg-gradient-to-br from-red-400 to-pink-500 rounded-full flex items-center justify-center">
+                            <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <h3 class="text-lg font-semibold text-red-800 mb-2">Analysis Failed</h3>
+                        <div id="errorMessage" class="text-red-700"></div>
+                        <button onclick="location.reload()" class="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200">
+                            Try Again
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const urlInput = document.getElementById('urlInput');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const results = document.getElementById('results');
+        const loading = document.getElementById('loading');
+        const error = document.getElementById('error');
+        const errorMessage = document.getElementById('errorMessage');
+
+        function showLoading() {
+            loading.classList.remove('hidden');
+            results.classList.add('hidden');
+            error.classList.add('hidden');
+            analyzeBtn.disabled = true;
+        }
+
+        function hideLoading() {
+            loading.classList.add('hidden');
+            analyzeBtn.disabled = false;
+        }
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            error.classList.remove('hidden');
+            results.classList.add('hidden');
+        }
+
+        function showResults(data) {
+            // Grade badge
+            const gradeBadge = document.getElementById('gradeBadge');
+            const grade = data.grade;
+            gradeBadge.textContent = grade;
+            gradeBadge.className = `text-3xl font-bold px-4 py-2 rounded-lg text-white grade-${grade.toLowerCase()}`;
+
+            // Summary
+            const summary = document.getElementById('summary');
+            const critical = data.findings.filter(f => f.severity === 'critical').length;
+            const warn = data.findings.filter(f => f.severity === 'warn').length;
+            const info = data.findings.filter(f => f.severity === 'info').length;
+            summary.textContent = `${critical} critical, ${warn} warnings, ${info} info items found`;
+
+            // Findings
+            const findingsContainer = document.getElementById('findings');
+            findingsContainer.innerHTML = '';
+            data.findings.forEach((finding, index) => {
+                const severityConfig = {
+                    'critical': {
+                        colors: 'bg-gradient-to-r from-red-50 to-pink-50 border-red-200 text-red-800',
+                        badge: 'bg-gradient-to-r from-red-500 to-pink-500 text-white',
+                        icon: 'M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'
+                    },
+                    'warn': {
+                        colors: 'bg-gradient-to-r from-yellow-50 to-orange-50 border-yellow-200 text-yellow-800',
+                        badge: 'bg-gradient-to-r from-yellow-500 to-orange-500 text-white',
+                        icon: 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z'
+                    },
+                    'info': {
+                        colors: 'bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 text-blue-800',
+                        badge: 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white',
+                        icon: 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'
+                    }
+                };
+                
+                const config = severityConfig[finding.severity];
+                const findingDiv = document.createElement('div');
+                findingDiv.className = `border-2 rounded-xl p-6 ${config.colors} card-hover animate-slide-up`;
+                findingDiv.style.animationDelay = `${index * 0.1}s`;
+                findingDiv.innerHTML = `
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0 mr-4">
+                            <div class="w-10 h-10 ${config.badge} rounded-lg flex items-center justify-center">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${config.icon}"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex items-center gap-3 mb-3">
+                                <h4 class="text-lg font-semibold text-gray-900">${finding.name}</h4>
+                                <span class="px-3 py-1 text-sm font-medium rounded-full ${config.badge} shadow-sm">
+                                    ${finding.severity.toUpperCase()}
+                                </span>
+                            </div>
+                            <p class="text-gray-700 mb-4 leading-relaxed">${finding.message}</p>
+                            <div class="bg-white/60 rounded-lg p-4 border border-white/40">
+                                <p class="text-sm font-medium text-gray-800 mb-1">💡 Suggestion:</p>
+                                <p class="text-sm text-gray-700">${finding.suggestion}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                findingsContainer.appendChild(findingDiv);
+            });
+
+            // Raw headers
+            document.getElementById('rawHeaders').textContent = JSON.stringify(data.rawHeaders, null, 2);
+
+            // Snippets
+            document.getElementById('dotnet-snippet').textContent = data.snippets.dotNet;
+            document.getElementById('nginx-snippet').textContent = data.snippets.nginx;
+            document.getElementById('express-snippet').textContent = data.snippets.express;
+
+            results.classList.remove('hidden');
+        }
+
+        async function analyzeUrl() {
+            const url = urlInput.value.trim();
+            if (!url) {
+                showError('Please enter a URL to analyze');
+                return;
+            }
+
+            showLoading();
+
+            try {
+                const response = await fetch('/inspect', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ url })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Analysis failed');
+                }
+
+                const data = await response.json();
+                showResults(data);
+            } catch (err) {
+                showError(err.message);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Event listeners
+        analyzeBtn.addEventListener('click', analyzeUrl);
+        urlInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                analyzeUrl();
+            }
+        });
+
+        // Download PDF
+        document.addEventListener('click', (e) => {
+            if (e.target && e.target.id === 'downloadPdfBtn') {
+                window.print();
+            }
+        });
+
+        // Copy functionality
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('copy-btn')) {
+                const targetId = e.target.getAttribute('data-target');
+                const targetElement = document.getElementById(targetId);
+                navigator.clipboard.writeText(targetElement.textContent).then(() => {
+                    e.target.textContent = 'Copied!';
+                    setTimeout(() => {
+                        e.target.textContent = 'Copy';
+                    }, 2000);
+                });
+            }
+        });
+    </script>
+</body>
+</html>
